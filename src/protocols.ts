@@ -11,6 +11,14 @@ export type ViaCEPAddress = {
   uf: string;
 };
 
+export type ViaCEPResponse = ViaCEPAddress & {
+  cep: string;
+  ibge: string;
+  gia: string;
+  ddd: string;
+  siafi: string;
+};
+
 export type RequestError = {
   status: number;
   data: object | null;
