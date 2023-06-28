@@ -4,20 +4,28 @@ import { invalidDataError, notFoundError } from '@/errors';
 import addressRepository, { CreateAddressParams } from '@/repositories/address-repository';
 import enrollmentRepository, { CreateEnrollmentParams } from '@/repositories/enrollment-repository';
 import { exclude } from '@/utils/prisma-utils';
+import { ViaCEPAddress, ViaCEPResponse } from '@/protocols';
 
-// TODO - Receber o CEP por parâmetro nesta função.
-async function getAddressFromCEP() {
-
-  // FIXME: está com CEP fixo!
-  const result = await request.get(`${process.env.VIA_CEP_API}/37440000/json/`);
+async function getAddressFromCEP(cep: string): Promise<GetAddressFromCEPResult> {
+  const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
 
   if (!result.data) {
     throw notFoundError();
   }
 
-  // FIXME: não estamos interessados em todos os campos
-  return result.data;
+  if (result.data.erro) {
+    throw invalidDataError(['cep is invalid', 'cep not found']);
+  }
+
+  const addressFromCep = exclude(result.data as ViaCEPResponse, 'cep', 'ibge', 'gia', 'ddd', 'siafi');
+  const cidade = addressFromCep.localidade;
+
+  delete addressFromCep.localidade;
+
+  return { ...addressFromCep, cidade };
 }
+
+type GetAddressFromCEPResult = Omit<ViaCEPAddress, 'localidade'> & { cidade: string };
 
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
   const enrollmentWithAddress = await enrollmentRepository.findWithAddressByUserId(userId);
@@ -47,10 +55,9 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   const enrollment = exclude(params, 'address');
   const address = getAddressForUpsert(params.address);
 
-  // TODO - Verificar se o CEP é válido antes de associar ao enrollment.
+  await getAddressFromCEP(address.cep);
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
-
   await addressRepository.upsert(newEnrollment.id, address, address);
 }
 
@@ -63,6 +70,10 @@ function getAddressForUpsert(address: CreateAddressParams) {
 
 export type CreateOrUpdateEnrollmentWithAddress = CreateEnrollmentParams & {
   address: CreateAddressParams;
+};
+
+export type GetAddressFromCEP = {
+  cep: string;
 };
 
 const enrollmentsService = {
