@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import httpStatus from 'http-status';
 import { AuthenticatedRequest } from '@/middlewares';
-import enrollmentsService, { GetAddressFromCEP } from '@/services/enrollments-service';
+import enrollmentsService from '@/services/enrollments-service';
 
 export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
@@ -32,8 +32,12 @@ export function isCepValid(cep: string) {
   return !!cep?.trim() && (!isNaN(Number(cep)) || cep.length === 8);
 }
 
+export type GetAddressFromCEPQuery = {
+  cep: string;
+};
+
 export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response) {
-  const { cep } = req.query as GetAddressFromCEP;
+  const { cep } = req.query as GetAddressFromCEPQuery;
   try {
     if (!isCepValid(cep)) {
       return res.sendStatus(httpStatus.NO_CONTENT);
