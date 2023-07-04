@@ -4,7 +4,7 @@ import { invalidDataError, notFoundError } from '@/errors';
 import addressRepository, { CreateAddressParams } from '@/repositories/address-repository';
 import enrollmentRepository, { CreateEnrollmentParams } from '@/repositories/enrollment-repository';
 import { exclude } from '@/utils/prisma-utils';
-import { ViaCEPAddress, ViaCEPResponse } from '@/protocols';
+import { ViaCEPAddress, ViaCEPAddressResponse } from '@/protocols';
 
 async function getAddressFromCEP(cep: string): Promise<GetAddressFromCEPResult> {
   const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
@@ -17,7 +17,7 @@ async function getAddressFromCEP(cep: string): Promise<GetAddressFromCEPResult> 
     throw invalidDataError(['cep is invalid', 'cep not found']);
   }
 
-  const addressFromCep = exclude(result.data as ViaCEPResponse, 'cep', 'ibge', 'gia', 'ddd', 'siafi');
+  const addressFromCep = exclude(result.data as ViaCEPAddressResponse, 'cep', 'ibge', 'gia', 'ddd', 'siafi');
   const cidade = addressFromCep.localidade;
 
   delete addressFromCep.localidade;
