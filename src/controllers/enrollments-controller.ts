@@ -16,16 +16,11 @@ export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Respon
 }
 
 export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, res: Response) {
-  try {
-    await enrollmentsService.createOrUpdateEnrollmentWithAddress({
-      ...req.body,
-      userId: req.userId,
-    });
-
-    return res.sendStatus(httpStatus.OK);
-  } catch (error) {
-    return res.sendStatus(httpStatus.BAD_REQUEST);
-  }
+  await enrollmentsService.createOrUpdateEnrollmentWithAddress({
+    ...req.body,
+    userId: req.userId,
+  });
+  return res.sendStatus(httpStatus.OK);
 }
 
 export function isCepValid(cep: string) {
@@ -49,6 +44,6 @@ export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response
     if (error.name === 'NotFoundError') {
       return res.send(httpStatus.NO_CONTENT);
     }
-    return res.sendStatus(httpStatus.BAD_REQUEST);
+    throw error;
   }
 }
