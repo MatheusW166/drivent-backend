@@ -1,7 +1,7 @@
 import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import eventsService from '../events-service';
 import { duplicatedEmailError } from './errors';
+import eventsService from '@/services/events-service';
 import userRepository from '@/repositories/user-repository';
 import { cannotEnrollBeforeStartDateError } from '@/errors';
 
