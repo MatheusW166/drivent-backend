@@ -13,5 +13,6 @@ type GetHotelRoomsRequest = AuthenticatedRequest & {
 
 export async function getHotelRooms(req: GetHotelRoomsRequest, res: Response) {
   const { hotelId } = req.params;
-  res.send(await hotelService.getHotelRooms(hotelId));
+  const userId = req.userId;
+  res.send(await hotelService.getHotelWithRooms(hotelId, userId));
 }

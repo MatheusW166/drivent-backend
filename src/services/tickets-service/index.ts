@@ -1,4 +1,4 @@
-import { notFoundError } from '@/errors';
+import { notFoundError, paymentRequiredError } from '@/errors';
 import enrollmentRepository from '@/repositories/enrollment-repository';
 import ticketRepository from '@/repositories/ticket-repository';
 
@@ -30,6 +30,29 @@ async function createTicket(userId: number, ticketTypeId: number) {
   return ticketRepository.create(ticketTypeId, enrollment.id);
 }
 
-const ticketsService = { getTicketTypes, getTicketByUser, createTicket };
+async function getUserPaidTicketWithHotelOrThrown(userId: number) {
+  const ticket = await ticketRepository.findByUser(userId);
+  if (!ticket) {
+    throw notFoundError();
+  }
+
+  if (ticket.status !== 'PAID') {
+    throw paymentRequiredError();
+  }
+
+  const ticketType = await ticketRepository.findTypeById(ticket.ticketTypeId);
+  if (!ticketType.includesHotel || ticketType.isRemote) {
+    throw paymentRequiredError();
+  }
+
+  return { ...ticket, ticketType };
+}
+
+const ticketsService = {
+  getTicketTypes,
+  getTicketByUser,
+  createTicket,
+  getUserPaidTicketWithHotelOrThrown,
+};
 
 export default ticketsService;
