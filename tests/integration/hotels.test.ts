@@ -109,3 +109,7 @@ describe('GET hotels/', () => {
     });
   });
 });
+
+describe('GET hotels/:hotelId', () => {
+  //TODO: tests for hotel rooms
+});
