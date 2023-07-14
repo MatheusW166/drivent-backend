@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import faker from '@faker-js/faker';
 import jwt from 'jsonwebtoken';
 import { cleanDb, generateValidTicket, generateValidToken } from '../helpers';
-import { createUser, createHotel, createEnrollmentWithAddress, createHotelRoom } from '../factories';
+import { createUser, createHotel, createEnrollmentWithAddress, createHotelRooms } from '../factories';
 import app, { init } from '@/app';
 
 beforeAll(async () => {
@@ -41,6 +41,7 @@ describe('GET hotels/', () => {
 
       const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
       expect(response.status).toBe(httpStatus.NOT_FOUND);
+      expect(response.body).toEqual({ message: 'No result for this search!' });
     });
 
     it('should respond 404 if there is no ticket', async () => {
@@ -50,6 +51,7 @@ describe('GET hotels/', () => {
 
       const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
       expect(response.status).toBe(httpStatus.NOT_FOUND);
+      expect(response.body).toEqual({ message: 'No result for this search!' });
     });
 
     describe('when ticket exists', () => {
@@ -60,6 +62,7 @@ describe('GET hotels/', () => {
 
         const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+        expect(response.body).toEqual({ message: 'No payment found' });
       });
 
       it('should respond 402 if ticket is remote', async () => {
@@ -69,6 +72,7 @@ describe('GET hotels/', () => {
 
         const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+        expect(response.body).toEqual({ message: 'No payment found' });
       });
 
       it('should respond 402 if ticket doesnt include hotel', async () => {
@@ -78,6 +82,7 @@ describe('GET hotels/', () => {
 
         const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+        expect(response.body).toEqual({ message: 'No payment found' });
       });
 
       it('should respond 404 if there is no hotel', async () => {
@@ -87,6 +92,7 @@ describe('GET hotels/', () => {
 
         const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.NOT_FOUND);
+        expect(response.body).toEqual({ message: 'No result for this search!' });
       });
 
       it('should respond 200 and a list of hotels if the user has a paid ticket that includes hotel and is not remote', async () => {
@@ -135,6 +141,7 @@ describe('GET hotels/:hotelId', () => {
 
       const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
       expect(response.status).toBe(httpStatus.NOT_FOUND);
+      expect(response.body).toEqual({ message: 'No result for this search!' });
     });
 
     it('should respond 404 if there is no ticket', async () => {
@@ -144,6 +151,7 @@ describe('GET hotels/:hotelId', () => {
 
       const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
       expect(response.status).toBe(httpStatus.NOT_FOUND);
+      expect(response.body).toEqual({ message: 'No result for this search!' });
     });
 
     it('should respond 400 if hotelId is lower than 1', async () => {
@@ -151,6 +159,11 @@ describe('GET hotels/:hotelId', () => {
 
       const response = await server.get('/hotels/0').set('Authorization', `Bearer ${token}`);
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
+      expect(response.body).toEqual({
+        details: ['"hotelId" must be greater than or equal to 1'],
+        message: 'Invalid data',
+        name: 'InvalidDataError',
+      });
     });
 
     describe('when ticket exists', () => {
@@ -161,6 +174,7 @@ describe('GET hotels/:hotelId', () => {
 
         const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+        expect(response.body).toEqual({ message: 'No payment found' });
       });
 
       it('should respond 402 if ticket is remote', async () => {
@@ -170,6 +184,7 @@ describe('GET hotels/:hotelId', () => {
 
         const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+        expect(response.body).toEqual({ message: 'No payment found' });
       });
 
       it('should respond 402 if ticket doesnt include hotel', async () => {
@@ -179,6 +194,7 @@ describe('GET hotels/:hotelId', () => {
 
         const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+        expect(response.body).toEqual({ message: 'No payment found' });
       });
 
       it('should respond 404 if hotelId doesnt exist', async () => {
@@ -188,6 +204,7 @@ describe('GET hotels/:hotelId', () => {
 
         const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(httpStatus.NOT_FOUND);
+        expect(response.body).toEqual({ message: 'No result for this search!' });
       });
 
       it('should respond 200 and a list of hotel rooms if the user has a paid ticket that includes hotel and is not remote', async () => {
@@ -195,30 +212,36 @@ describe('GET hotels/:hotelId', () => {
         const token = await generateValidToken(user);
         await generateValidTicket(user, 'PAID', { includesHotel: true, isRemote: false });
         const hotel = await createHotel();
-        const room = await createHotelRoom(hotel.id);
+        const rooms = await createHotelRooms(hotel.id);
 
         const response = await server.get('/hotels/1').set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(httpStatus.OK);
-        expect(response.body).toEqual([
-          {
-            id: hotel.id,
-            name: hotel.name,
-            image: hotel.image,
-            createdAt: hotel.createdAt.toISOString(),
-            updatedAt: hotel.updatedAt.toISOString(),
-            Rooms: [
-              {
-                id: room.id,
-                name: room.name,
-                capacity: room.capacity,
-                hotelId: room.hotelId,
-                createdAt: room.createdAt.toISOString(),
-                updatedAt: room.updatedAt.toISOString(),
-              },
-            ],
-          },
-        ]);
+        expect(response.body).toEqual({
+          id: hotel.id,
+          name: hotel.name,
+          image: hotel.image,
+          createdAt: hotel.createdAt.toISOString(),
+          updatedAt: hotel.updatedAt.toISOString(),
+          Rooms: [
+            {
+              id: rooms[0].id,
+              name: rooms[0].name,
+              capacity: rooms[0].capacity,
+              hotelId: rooms[0].hotelId,
+              createdAt: rooms[0].createdAt.toISOString(),
+              updatedAt: rooms[0].updatedAt.toISOString(),
+            },
+            {
+              id: rooms[1].id,
+              name: rooms[1].name,
+              capacity: rooms[1].capacity,
+              hotelId: rooms[1].hotelId,
+              createdAt: rooms[1].createdAt.toISOString(),
+              updatedAt: rooms[1].updatedAt.toISOString(),
+            },
+          ],
+        });
       });
     });
   });
