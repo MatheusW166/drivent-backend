@@ -1,0 +1,16 @@
+import { Room } from '@prisma/client';
+import faker from '@faker-js/faker';
+
+export function createBookingResponse(): { id: number; Room: Room } {
+  return {
+    id: faker.datatype.number({ min: 1 }),
+    Room: {
+      id: faker.datatype.number({ min: 1 }),
+      hotelId: faker.datatype.number({ min: 1 }),
+      name: faker.company.companyName(),
+      capacity: faker.datatype.number({ min: 1 }),
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.past(),
+    },
+  };
+}
