@@ -1,6 +1,36 @@
 import faker from '@faker-js/faker';
-import { TicketStatus, TicketType } from '@prisma/client';
+import { Ticket, TicketStatus, TicketType } from '@prisma/client';
 import { prisma } from '@/config';
+
+type CreateTicketResponseProps = Ticket & {
+  TicketType: TicketType;
+};
+
+export function createTicketResponse(props?: Partial<CreateTicketResponseProps>) {
+  const randomIdx = faker.datatype.number({ min: 0, max: 1 });
+  const status = randomIdx ? TicketStatus.PAID : TicketStatus.RESERVED;
+  return {
+    createdAt: props?.createdAt ?? faker.date.past(),
+    updatedAt: props?.updatedAt ?? faker.date.soon(),
+    enrollmentId: props?.enrollmentId ?? faker.datatype.number({ min: 1 }),
+    status: props?.status ?? status,
+    id: props?.id ?? faker.datatype.number({ min: 1 }),
+    ticketTypeId: props?.ticketTypeId ?? faker.datatype.number({ min: 1 }),
+    TicketType: props?.TicketType ?? createTicketTypeResponse(),
+  };
+}
+
+export function createTicketTypeResponse(props?: Partial<TicketType>) {
+  return {
+    name: props?.name ?? faker.name.findName(),
+    price: props?.price ?? faker.datatype.number(),
+    isRemote: props?.isRemote ?? faker.datatype.boolean(),
+    includesHotel: props?.includesHotel ?? faker.datatype.boolean(),
+    id: props?.id ?? faker.datatype.number({ min: 1 }),
+    createdAt: props?.createdAt ?? faker.date.past(),
+    updatedAt: props?.updatedAt ?? faker.date.soon(),
+  };
+}
 
 export async function createTicketType(params?: Partial<TicketType>) {
   return prisma.ticketType.create({

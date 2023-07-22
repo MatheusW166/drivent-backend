@@ -45,7 +45,7 @@ async function getUserPaidTicketWithHotelOrThrown(userId: number) {
     throw paymentRequiredError();
   }
 
-  return { ...ticket, ticketType };
+  return ticket;
 }
 
 const ticketsService = {

@@ -14,3 +14,14 @@ export function createBookingResponse(): { id: number; Room: Room } {
     },
   };
 }
+
+export function createRoomResponse({ capacity }: { capacity?: number }) {
+  return {
+    id: faker.datatype.number({ min: 1 }),
+    hotelId: faker.datatype.number({ min: 1 }),
+    name: faker.company.companyName(),
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.past(),
+    capacity: capacity ?? faker.datatype.number({ min: 1 }),
+  };
+}
