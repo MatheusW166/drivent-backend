@@ -120,4 +120,52 @@ describe('Booking service', () => {
       expect(response).toEqual(fakeBooking);
     });
   });
+
+  describe('update booking', () => {
+    const fakeUserId = faker.datatype.number({ min: 1 });
+    const fakeRoomId = faker.datatype.number({ min: 1 });
+    const fakeBooking = createBookingResponse();
+
+    it('should throw not found when roomId does not exist', async () => {
+      jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(fakeBooking);
+      jest.spyOn(roomRepository, 'findById').mockResolvedValue(null);
+
+      try {
+        await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
+      } catch (err) {
+        expect(err.name).toBe('NotFoundError');
+      }
+    });
+
+    it('should throw full room error when room is full', async () => {
+      jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(fakeBooking);
+      jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({ capacity: 0 }));
+
+      try {
+        await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
+      } catch (err) {
+        expect(err.name).toBe('FullRoomError');
+      }
+    });
+
+    it('should throw not found error when user has no booking', async () => {
+      jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(null);
+      jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({}));
+
+      try {
+        await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
+      } catch (err) {
+        expect(err.name).toBe('NotFoundError');
+      }
+    });
+
+    it('should return updated booking', async () => {
+      jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(fakeBooking);
+      jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({}));
+      jest.spyOn(bookingRepository, 'updateBooking').mockResolvedValue(fakeBooking);
+
+      const response = await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
+      expect(response).toEqual(fakeBooking);
+    });
+  });
 });
