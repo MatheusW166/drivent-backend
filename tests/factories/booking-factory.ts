@@ -1,7 +1,9 @@
 import { Room } from '@prisma/client';
 import faker from '@faker-js/faker';
 
-export function createBookingResponse(): { id: number; Room: Room } {
+export type CreateBookingResponse = { id: number; Room: Room };
+
+export function createBookingResponse(): CreateBookingResponse {
   return {
     id: faker.datatype.number({ min: 1 }),
     Room: {

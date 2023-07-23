@@ -1,5 +1,5 @@
 import faker from '@faker-js/faker';
-import { createBookingResponse, createRoomResponse } from '../factories/ booking-factory';
+import { CreateBookingResponse, createBookingResponse, createRoomResponse } from '../factories/booking-factory';
 import { createTicketResponse, createTicketTypeResponse } from '../factories';
 import ticketRepository from '@/repositories/ticket-repository';
 import roomRepository from '@/repositories/room-repository';
@@ -160,12 +160,15 @@ describe('Booking service', () => {
     });
 
     it('should return updated booking', async () => {
+      const fakeBookingUpdated = JSON.parse(JSON.stringify(fakeBooking)) as CreateBookingResponse;
+      fakeBookingUpdated.Room.id = fakeRoomId;
+
       jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(fakeBooking);
       jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({}));
-      jest.spyOn(bookingRepository, 'updateBooking').mockResolvedValue(fakeBooking);
+      jest.spyOn(bookingRepository, 'updateBooking').mockResolvedValue(fakeBookingUpdated);
 
       const response = await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
-      expect(response).toEqual(fakeBooking);
+      expect(response).toEqual(fakeBookingUpdated);
     });
   });
 });
