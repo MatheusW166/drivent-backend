@@ -1,5 +1,10 @@
-import roomRepository from '../room-repository';
 import { prisma } from '@/config';
+
+async function countBookingByRoom(roomId: number) {
+  return prisma.booking.count({
+    where: { roomId },
+  });
+}
 
 async function findByUserId(userId: number) {
   return prisma.booking.findFirst({
@@ -12,8 +17,6 @@ async function findByUserId(userId: number) {
 }
 
 async function createBooking(userId: number, roomId: number) {
-  await roomRepository.decrementCapacity(roomId);
-
   return prisma.booking.create({
     data: {
       userId,
@@ -26,13 +29,6 @@ async function createBooking(userId: number, roomId: number) {
 }
 
 async function updateBooking(bookingId: number, roomId: number) {
-  await roomRepository.decrementCapacity(roomId);
-
-  await prisma.booking.update({
-    where: { id: bookingId },
-    data: { Room: { update: { capacity: { increment: 1 } } } },
-  });
-
   return prisma.booking.update({
     data: { roomId },
     where: { id: bookingId },
@@ -42,6 +38,6 @@ async function updateBooking(bookingId: number, roomId: number) {
   });
 }
 
-const bookingRepository = { findByUserId, createBooking, updateBooking };
+const bookingRepository = { findByUserId, createBooking, updateBooking, countBookingByRoom };
 
 export default bookingRepository;

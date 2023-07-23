@@ -47,8 +47,10 @@ describe('create booking', () => {
   });
 
   it('should throw full room error when room is full', async () => {
+    const room = createRoomResponse({});
     jest.spyOn(ticketsService, 'getUserPaidTicketWithHotelOrThrown').mockResolvedValue(createTicketResponse());
-    jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({ capacity: 0 }));
+    jest.spyOn(roomRepository, 'findById').mockResolvedValue(room);
+    jest.spyOn(bookingRepository, 'countBookingByRoom').mockResolvedValue(room.capacity);
 
     try {
       await bookingService.create(fakeUserId, fakeRoomId);
@@ -112,7 +114,8 @@ describe('create booking', () => {
     const fakeBooking = createBookingResponse();
 
     jest.spyOn(ticketsService, 'getUserPaidTicketWithHotelOrThrown').mockResolvedValue(fakeTicket);
-    jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({ capacity: 1 }));
+    jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({}));
+    jest.spyOn(bookingRepository, 'countBookingByRoom').mockResolvedValue(0);
     jest.spyOn(bookingRepository, 'createBooking').mockResolvedValue(fakeBooking);
 
     const response = await bookingService.create(fakeUserId, fakeRoomId);
@@ -137,8 +140,10 @@ describe('update booking', () => {
   });
 
   it('should throw full room error when room is full', async () => {
+    const room = createRoomResponse({});
     jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(fakeBooking);
-    jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({ capacity: 0 }));
+    jest.spyOn(roomRepository, 'findById').mockResolvedValue(room);
+    jest.spyOn(bookingRepository, 'countBookingByRoom').mockResolvedValue(room.capacity);
 
     try {
       await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
@@ -164,6 +169,7 @@ describe('update booking', () => {
 
     jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(fakeBooking);
     jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({}));
+    jest.spyOn(bookingRepository, 'countBookingByRoom').mockResolvedValue(0);
     jest.spyOn(bookingRepository, 'updateBooking').mockResolvedValue(fakeBookingUpdated);
 
     const response = await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);

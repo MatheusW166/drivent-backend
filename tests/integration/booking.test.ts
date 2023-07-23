@@ -108,7 +108,9 @@ describe('POST /booking', () => {
       const token = await generateValidToken(user);
       await generateValidTicketWithHotel(user);
       const hotel = await createHotel();
-      const fullRoom = await createHotelRoom(hotel.id, 0);
+
+      const fullRoom = await createHotelRoom(hotel.id, 1);
+      await generateValidBooking(await createUser(), hotel, fullRoom);
 
       const response = await server
         .post('/booking')
@@ -215,7 +217,10 @@ describe('PUT /booking/:bookingId', () => {
       const user = await createUser();
       const token = await generateValidToken(user);
       const booking = await generateValidBooking(user);
-      const fullRoom = await createHotelRoom(booking.Room.hotelId, 0);
+
+      const hotel = await createHotel();
+      const fullRoom = await createHotelRoom(hotel.id, 1);
+      await generateValidBooking(await createUser(), hotel, fullRoom);
 
       const response = await server
         .put(`/booking/${booking.id}`)

@@ -15,7 +15,9 @@ async function create(userId: number, roomId: number) {
 
   const room = await roomRepository.findById(roomId);
   if (!room) throw notFoundError();
-  if (room.capacity === 0) throw fullRoomError();
+
+  const count = await bookingRepository.countBookingByRoom(roomId);
+  if (room.capacity === count) throw fullRoomError();
 
   const booking = await bookingRepository.createBooking(userId, roomId);
   return { bookingId: booking.id };
@@ -27,7 +29,9 @@ async function update(userId: number, bookingId: number, roomId: number) {
 
   const room = await roomRepository.findById(roomId);
   if (!room) throw notFoundError();
-  if (room.capacity === 0) throw fullRoomError();
+
+  const count = await bookingRepository.countBookingByRoom(roomId);
+  if (room.capacity === count) throw fullRoomError();
 
   const updatedBooking = await bookingRepository.updateBooking(bookingId, roomId);
   return { bookingId: updatedBooking.id };
