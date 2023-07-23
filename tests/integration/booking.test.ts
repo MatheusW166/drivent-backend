@@ -11,16 +11,14 @@ import {
   generateValidTicketWithHotel,
 } from '../factories';
 import { generateValidBooking } from '../factories/booking-factory';
-import { disconnectDB } from '@/config';
 import app, { init } from '@/app';
 
-beforeEach(async () => {
+beforeAll(async () => {
   await init();
-  await cleanDb();
 });
 
-afterAll(async () => {
-  await disconnectDB();
+beforeEach(async () => {
+  await cleanDb();
 });
 
 const server = supertest(app);
