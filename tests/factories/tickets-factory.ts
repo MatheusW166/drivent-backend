@@ -1,5 +1,6 @@
 import faker from '@faker-js/faker';
-import { Ticket, TicketStatus, TicketType } from '@prisma/client';
+import { Ticket, TicketStatus, TicketType, User } from '@prisma/client';
+import { createEnrollmentWithAddress } from './enrollments-factory';
 import { prisma } from '@/config';
 
 type CreateTicketResponseProps = Ticket & {
@@ -73,4 +74,20 @@ export async function createTicketTypeWithHotel() {
       includesHotel: true,
     },
   });
+}
+
+export async function generateValidTicket(
+  user: User,
+  ticketStatus: TicketStatus,
+  ticketTypeParams: Pick<TicketType, 'includesHotel' | 'isRemote'>,
+) {
+  const enrollment = await createEnrollmentWithAddress(user);
+  const ticketType = await createTicketType({
+    ...ticketTypeParams,
+  });
+  return createTicket(enrollment.id, ticketType.id, ticketStatus);
+}
+
+export async function generateValidTicketWithHotel(user: User) {
+  return generateValidTicket(user, 'PAID', { includesHotel: true, isRemote: false });
 }

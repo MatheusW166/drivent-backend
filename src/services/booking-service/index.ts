@@ -17,7 +17,8 @@ async function create(userId: number, roomId: number) {
   if (!room) throw notFoundError();
   if (room.capacity === 0) throw fullRoomError();
 
-  return bookingRepository.createBooking(userId, roomId);
+  const booking = await bookingRepository.createBooking(userId, roomId);
+  return { bookingId: booking.id };
 }
 
 async function update(userId: number, bookingId: number, roomId: number) {
@@ -28,7 +29,8 @@ async function update(userId: number, bookingId: number, roomId: number) {
   if (!room) throw notFoundError();
   if (room.capacity === 0) throw fullRoomError();
 
-  return bookingRepository.updateBooking(bookingId, roomId);
+  const updatedBooking = await bookingRepository.updateBooking(bookingId, roomId);
+  return { bookingId: updatedBooking.id };
 }
 
 const bookingService = { findByUserId, create, update };

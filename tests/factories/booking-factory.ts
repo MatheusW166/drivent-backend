@@ -1,5 +1,7 @@
-import { Room } from '@prisma/client';
+import { Hotel, Room, User } from '@prisma/client';
 import faker from '@faker-js/faker';
+import { createHotel, createHotelRoom } from './hotels-factory';
+import { prisma } from '@/config';
 
 export type CreateBookingResponse = { id: number; Room: Room };
 
@@ -26,4 +28,19 @@ export function createRoomResponse({ capacity }: { capacity?: number }) {
     updatedAt: faker.date.past(),
     capacity: capacity ?? faker.datatype.number({ min: 1 }),
   };
+}
+
+export async function generateValidBooking(user: User, hotel?: Hotel, room?: Room) {
+  const incomingHotel = hotel ?? (await createHotel());
+  const incomingRoom = room ?? (await createHotelRoom(incomingHotel.id));
+  return prisma.booking.create({
+    data: {
+      roomId: incomingRoom.id,
+      userId: user.id,
+    },
+    select: {
+      id: true,
+      Room: true,
+    },
+  });
 }

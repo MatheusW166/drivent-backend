@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
-import { TicketStatus, TicketType, User } from '@prisma/client';
-
-import { createEnrollmentWithAddress, createTicket, createTicketType, createUser } from './factories';
+import { User } from '@prisma/client';
+import faker from '@faker-js/faker';
+import { createUser } from './factories';
 import { createSession } from './factories/sessions-factory';
 import { prisma } from '@/config';
 
@@ -28,14 +28,6 @@ export async function generateValidToken(user?: User) {
   return token;
 }
 
-export async function generateValidTicket(
-  user: User,
-  ticketStatus: TicketStatus,
-  ticketTypeParams: Pick<TicketType, 'includesHotel' | 'isRemote'>,
-) {
-  const enrollment = await createEnrollmentWithAddress(user);
-  const ticketType = await createTicketType({
-    ...ticketTypeParams,
-  });
-  return await createTicket(enrollment.id, ticketType.id, ticketStatus);
+export function generateFakeId() {
+  return faker.datatype.number({ min: 1 });
 }

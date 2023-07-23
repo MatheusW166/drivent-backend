@@ -117,7 +117,7 @@ describe('Booking service', () => {
       jest.spyOn(bookingRepository, 'createBooking').mockResolvedValue(fakeBooking);
 
       const response = await bookingService.create(fakeUserId, fakeRoomId);
-      expect(response).toEqual(fakeBooking);
+      expect(response).toEqual({ bookingId: fakeBooking.id });
     });
   });
 
@@ -168,7 +168,7 @@ describe('Booking service', () => {
       jest.spyOn(bookingRepository, 'updateBooking').mockResolvedValue(fakeBookingUpdated);
 
       const response = await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
-      expect(response).toEqual(fakeBookingUpdated);
+      expect(response).toEqual({ bookingId: fakeBookingUpdated.id });
     });
   });
 });

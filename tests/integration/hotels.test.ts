@@ -2,8 +2,14 @@ import supertest from 'supertest';
 import httpStatus from 'http-status';
 import faker from '@faker-js/faker';
 import jwt from 'jsonwebtoken';
-import { cleanDb, generateValidTicket, generateValidToken } from '../helpers';
-import { createUser, createHotel, createEnrollmentWithAddress, createHotelRooms } from '../factories';
+import { cleanDb, generateValidToken } from '../helpers';
+import {
+  createUser,
+  createHotel,
+  createEnrollmentWithAddress,
+  createHotelRooms,
+  generateValidTicket,
+} from '../factories';
 import app, { init } from '@/app';
 
 beforeAll(async () => {

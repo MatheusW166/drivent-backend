@@ -32,6 +32,7 @@ async function createTicket(userId: number, ticketTypeId: number) {
 
 async function getUserPaidTicketWithHotelOrThrown(userId: number) {
   const ticket = await ticketRepository.findByUser(userId);
+
   if (!ticket) {
     throw notFoundError();
   }
