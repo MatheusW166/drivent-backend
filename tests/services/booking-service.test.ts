@@ -148,14 +148,14 @@ describe('Booking service', () => {
       }
     });
 
-    it('should throw not found error when user has no booking', async () => {
+    it('should throw forbidden error when user has no booking', async () => {
       jest.spyOn(bookingRepository, 'findByUserId').mockResolvedValue(null);
       jest.spyOn(roomRepository, 'findById').mockResolvedValue(createRoomResponse({}));
 
       try {
         await bookingService.update(fakeUserId, fakeBooking.id, fakeRoomId);
       } catch (err) {
-        expect(err.name).toBe('NotFoundError');
+        expect(err.name).toBe('ForbiddenError');
       }
     });
 

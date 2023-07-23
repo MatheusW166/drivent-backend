@@ -189,14 +189,14 @@ describe('PUT /booking/:bookingId', () => {
   });
 
   describe('when token is valid', () => {
-    it('should respond 404 when bookingId does not exist', async () => {
+    it('should respond 403 when bookingId does not exist', async () => {
       const token = await generateValidToken();
 
       const response = await server
         .put(`/booking/${fakeBookingId}`)
         .set('Authorization', `Bearer ${token}`)
         .send({ roomId: generateFakeId() });
-      expect(response.status).toBe(httpStatus.NOT_FOUND);
+      expect(response.status).toBe(httpStatus.FORBIDDEN);
     });
 
     it('should respond 404 when roomId does not exist', async () => {

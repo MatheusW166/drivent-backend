@@ -1,5 +1,5 @@
 import roomRepository from '@/repositories/room-repository';
-import { notFoundError } from '@/errors';
+import { notFoundError, forbiddenError } from '@/errors';
 import bookingRepository from '@/repositories/booking-repository';
 import ticketsService from '@/services/tickets-service';
 import fullRoomError from '@/errors/full-room-error';
@@ -23,7 +23,7 @@ async function create(userId: number, roomId: number) {
 
 async function update(userId: number, bookingId: number, roomId: number) {
   const booking = await bookingRepository.findByUserId(userId);
-  if (!booking || bookingId !== booking.id) throw notFoundError();
+  if (!booking || bookingId !== booking.id) throw forbiddenError();
 
   const room = await roomRepository.findById(roomId);
   if (!room) throw notFoundError();
